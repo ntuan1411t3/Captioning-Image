@@ -14,17 +14,14 @@ from keras.preprocessing import image
 import nltk
 from keras.models import Model
 
+with open('config.p', 'rb') as handle:
+    config_info = pickle.load(handle)
 
-def get_config():
-    with open('config.p', 'rb') as handle:
-        config_info = pickle.load(handle)
-
-    (vocab_size, max_len, word2idx, idx2word) = config_info
-
-    return vocab_size, max_len, word2idx, idx2word
-
-
-vocab_size, max_len, word2idx, idx2word = get_config()
+(vocab_size, max_len, word2idx, idx2word) = config_info
+model = InceptionV3(weights='imagenet')
+new_input = model.input
+hidden_layer = model.layers[-2].output
+model_new = Model(new_input, hidden_layer)
 
 
 def preprocess(image_path):
@@ -99,10 +96,6 @@ def data_generator(batch_size=32):
 
 
 def encode_image_v3(image_path):
-    model = InceptionV3(weights='imagenet')
-    new_input = model.input
-    hidden_layer = model.layers[-2].output
-    model_new = Model(new_input, hidden_layer)
 
     image = preprocess(image_path)
     temp_enc = model_new.predict(image)
